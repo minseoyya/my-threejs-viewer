@@ -1,0 +1,29 @@
+name: Update latest.jpg
+
+on:
+  push:
+    paths:
+      - output.jpg          # main 브랜치에 output.jpg 푸시될 때만 실행
+
+jobs:
+  sync-latest:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Copy output.jpg → texture/latest.jpg
+      run: |
+        mkdir -p texture
+        cp output.jpg texture/latest.jpg
+
+    - name: Commit & push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # 기본 제공 토큰
+      run: |
+        git config --global user.name  "github-actions"
+        git config --global user.email "actions@github.com"
+        git add texture/latest.jpg
+        git commit -m "🔄 Auto-sync latest.jpg" || echo "No changes to commit"
+        git push
