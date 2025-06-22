@@ -2,43 +2,49 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Three.js Texture Viewer</title>
+  <title>Texture Viewer</title>
   <style>
     body { margin: 0; overflow: hidden; }
     canvas { display: block; }
   </style>
 </head>
 <body>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
-  <script>
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.z = 2;
+  <script type="module">
+    import * as THREE from "https://cdn.skypack.dev/three@0.152.2";
 
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    const geometry = new THREE.SphereGeometry(0.8, 64, 64);
+    const geometry = new THREE.SphereGeometry(1, 64, 64);
     const textureLoader = new THREE.TextureLoader();
-    const texture = textureLoader.load('./texture/latest.jpg');
-    const material = new THREE.MeshStandardMaterial({ map: texture });
 
-    const sphere = new THREE.Mesh(geometry, material);
-    scene.add(sphere);
+    // 🔄 최신 텍스처 자동 반영 (캐싱 방지용 timestamp 포함)
+    const texture = textureLoader.load(
+      "texture/latest.jpg?" + new Date().getTime(),
+      () => {
+        const material = new THREE.MeshStandardMaterial({ map: texture });
+        const sphere = new THREE.Mesh(geometry, material);
+        scene.add(sphere);
 
-    const light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(1, 1, 1).normalize();
-    scene.add(light);
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(2, 2, 5);
+        scene.add(light);
+
+        camera.position.z = 3;
+        animate();
+      }
+    );
 
     function animate() {
       requestAnimationFrame(animate);
-      sphere.rotation.y += 0.003;
+      scene.rotation.y += 0.005;
       renderer.render(scene, camera);
     }
-    animate();
 
-    window.addEventListener('resize', () => {
+    window.addEventListener("resize", () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
